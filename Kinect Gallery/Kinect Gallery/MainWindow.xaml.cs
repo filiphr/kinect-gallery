@@ -1,7 +1,8 @@
-﻿
-
-
-
+﻿//------------------------------------------------------------------------------
+// <copyright file="MainWindow.xaml.cs" company="Microsoft">
+//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// </copyright>
+//------------------------------------------------------------------------------
 
 namespace Kinect_Gallery
 {
@@ -19,6 +20,7 @@ namespace Kinect_Gallery
     using Microsoft.Samples.Kinect.SwipeGestureRecognizer;
     using System.Windows.Controls;
     using Kinect_Gallery.Helpers;
+    using System.Windows.Forms;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -118,12 +120,19 @@ namespace Kinect_Gallery
         /// </summary>
         float z1;
 
+
+
+
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow" /> class.
         /// </summary>
         ///  
         public MainWindow()
         {
+            //this.PreviousPicture = this.LoadPicture(this.Index - 1);
+            //this.Picture = this.LoadPicture(this.Index);
+            //this.NextPicture = this.LoadPicture(this.Index + 1);
 
             InitializeComponent();
 
@@ -226,7 +235,7 @@ namespace Kinect_Gallery
         public BitmapImage Picture { get; private set; }
 
         /// <summary>
-        /// Gets the next image displayed.
+        /// Gets teh next image displayed.
         /// </summary>
         public BitmapImage NextPicture { get; private set; }
 
@@ -263,11 +272,14 @@ namespace Kinect_Gallery
         /// </summary>
         /// <param name="folderPath">The path of the folder with images to be displayed.</param>
         /// <returns>Paths to pictures.</returns>
-        private static string[] CreatePicturePathsFromFolder(string folderPath)
+
+        private static string[] CreatePicturePathsNova(string folderPath)
         {
             var list = new List<string>();
 
+            //var commonPicturesPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonPictures);
             list.AddRange(Directory.GetFiles(folderPath, "*.jpg", SearchOption.AllDirectories));
+
             if (list.Count == 0)
             {
                 list.AddRange(Directory.GetFiles(folderPath, "*.png", SearchOption.AllDirectories));
@@ -326,6 +338,8 @@ namespace Kinect_Gallery
             // Wire-up swipe right to manually advance picture.
             recognizer.SwipeRightDetected += (s, e) =>
             {
+
+
                 if (e.Skeleton.TrackingId == nearestId)
                 {
                     if (GalleryView.Visibility == Visibility.Visible)
@@ -336,7 +350,6 @@ namespace Kinect_Gallery
                     {
                         FolderViewRightRecognized();
                     }
-
                     var storyboard = Resources["LeftAnimate"] as Storyboard;
                     if (storyboard != null)
                     {
@@ -606,21 +619,26 @@ namespace Kinect_Gallery
                                 Canvas.SetLeft(handImg, left);
                                 handImg.Visibility = Visibility.Visible;
 
+
+
                                 if (flag == 0)
                                 {
                                     z1 = (float)handPosition.Z;
                                     flag = 1;
                                 }
                                 if ((z1 - ((float)handPosition.Z)) >= 0.3)
-                                {
+                                {//txtHi5.Text = "Hi 5";
                                     BitmapImage logo = new BitmapImage();
                                     logo.BeginInit();
                                     logo.UriSource = new Uri(@"Images\right-hand-green.png", UriKind.Relative);
                                     logo.EndInit();
                                     handImg.Source = logo;
+
                                     lstFolders.SelectedIndex = selectItem(left);
+
                                     flag = 0;
                                 }
+
                             }
                         }
                     }
@@ -634,6 +652,10 @@ namespace Kinect_Gallery
                     this.activeRecognizer.Recognize(sender, frame, this.skeletons);
 
                     this.DrawStickMen(this.skeletons);
+
+
+
+
                 }
             }
         }
@@ -658,7 +680,9 @@ namespace Kinect_Gallery
             }
             else { index = (int)scrollViewer.HorizontalOffset + 2; }
 
+
             return index;
+
         }
 
         /// <summary>
@@ -776,15 +800,13 @@ namespace Kinect_Gallery
             {
                 Folder folder = (Folder)lstFolders.SelectedItem;
 
-                picturePaths = CreatePicturePathsFromFolder(folder.FolderPath);
+                picturePaths = CreatePicturePathsNova(folder.FolderPath);
 
                 FolderView.Visibility = Visibility.Collapsed;
                 GalleryView.Visibility = Visibility.Visible;
-
                 this.PreviousPicture = this.LoadPicture(this.Index - 1);
                 this.Picture = this.LoadPicture(this.Index);
                 this.NextPicture = this.LoadPicture(this.Index + 1);
-
                 if (this.PropertyChanged != null)
                 {
                     this.PropertyChanged(this, new PropertyChangedEventArgs("PreviousPicture"));
@@ -804,13 +826,25 @@ namespace Kinect_Gallery
             picturePaths = null;
             GalleryView.Visibility = Visibility.Collapsed;
             FolderView.Visibility = Visibility.Visible;
-            Index = 1;
-            lstFolders.SelectedIndex = -1;
             BitmapImage logo = new BitmapImage();
             logo.BeginInit();
-            logo.UriSource = new Uri(@"Images\right-hand-green.png", UriKind.Relative);
+            logo.UriSource = new Uri(@"Images\right-hand.png", UriKind.Relative);
             logo.EndInit();
+            handImg.Source = logo;
+            Index = 1;
+            lstFolders.SelectedIndex = -1;
+        }
+
+        private void btnAddFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new FolderBrowserDialog();
+            dialog.SelectedPath = "C:\\";
+            DialogResult result = dialog.ShowDialog();
+            if (result.ToString() == "OK")
+            {
+                string folderPath = System.IO.Path.GetFullPath(dialog.SelectedPath.ToString()).TrimEnd(System.IO.Path.DirectorySeparatorChar);
+                folders.Add(new Folder(folderPath));
+            }
         }
     }
 }
-

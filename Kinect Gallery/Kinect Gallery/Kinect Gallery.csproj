@@ -57,6 +57,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -83,7 +84,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Helpers\Folder.cs" />
-    <Compile Include="Helpers\ImagePathConverter.cs" />
+    <Compile Include="Helpers\ImageConverter.cs" />
     <Compile Include="Helpers\ReadWriteCsv.cs" />
     <Compile Include="Helpers\ScrollHelper.cs" />
     <Compile Include="MainWindow.xaml.cs">
