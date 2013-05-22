@@ -8,7 +8,7 @@ using System.Windows.Media.Imaging;
 
 namespace Kinect_Gallery.Helpers
 {
-    class ImagePathConverter : IValueConverter
+    class ImageConverter : IValueConverter
     {
         private string imageDirectory = Directory.GetCurrentDirectory();
         public string ImageDirectory
