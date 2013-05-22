@@ -92,6 +92,11 @@ namespace Kinect_Gallery.Helpers
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <returns></returns>
         private bool folderExists(Folder folder)
         {
             foreach (Folder f in Items)
