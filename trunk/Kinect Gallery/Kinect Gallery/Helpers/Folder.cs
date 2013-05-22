@@ -5,6 +5,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using Kinect_Gallery.Properties;
 using System.IO;
+using Kinect_Gallery.Exceptions;
 
 
 namespace Kinect_Gallery.Helpers
@@ -47,9 +48,9 @@ namespace Kinect_Gallery.Helpers
         public Folders()
         {
             String imagesPath = Settings.Default.ImagesPath;
-            String databasePath = Settings.Default.DatabasePath;
+            String foldersCsvPath = Settings.Default.FoldersCsvPath;
             // Read sample data from CSV file
-            using (CsvFileReader reader = new CsvFileReader(databasePath + "\\Folders.csv"))
+            using (CsvFileReader reader = new CsvFileReader(foldersCsvPath))
             {
                 CsvRow row = new CsvRow();
                 while (reader.ReadRow(row))
@@ -67,6 +68,40 @@ namespace Kinect_Gallery.Helpers
                 //Add(new Folder("Team Design", @"C:\Users\test\Pictures\EBEC 2012 da se sredat\Team Design", imagesPath + "\\folder.jpg"));
             }
           //  Add(new Folder("Corsa", @"C:\Dopolnitelno\Sliki\Corsa", @"C:\Dopolnitelno\Projects\Visual Studio 2010\Projects\SlideshowGestures-WPF\Images\folder.jpg"));
+        }
+
+        /// <summary>
+        /// Inserts the folderpath in the .csv file and adds it to the Observable collection
+        /// </summary>
+        /// <param name="folderPath">The path of the folder to be inserted and added</param>
+        /// <exception cref="Exception">When the folder is already added to the collection</exception>
+        internal void InsertAndAdd(string folderPath) 
+        {
+            Folder folder = new Folder(folderPath);
+            if (folderExists(folder))
+            {
+                throw new ExistsException(String.Format("The folder {0} is already added.",folder.FolderName));
+            }
+            Add(folder);
+            String foldersCsvPath = Settings.Default.FoldersCsvPath;
+            using (CsvFileWriter writer = new CsvFileWriter(foldersCsvPath))
+            {
+                CsvRow row = new CsvRow();
+                row.Add(String.Format("{0}", folderPath));
+                writer.WriteRow(row);
+            }
+        }
+
+        private bool folderExists(Folder folder)
+        {
+            foreach (Folder f in Items)
+            {
+                if (f.FolderPath == folder.FolderPath) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
