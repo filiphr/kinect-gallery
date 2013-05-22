@@ -36,13 +36,13 @@ namespace Kinect_Gallery.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\Dopolnitelno\\\\Projects\\\\Visual Studio 2010\\\\Projects\\\\Kinect Gallery\\\\Kinect " +
-            "Gallery\\\\Database")]
-        public string DatabasePath {
+            "Gallery\\\\Database\\\\Folders.csv")]
+        public string FoldersCsvPath {
             get {
-                return ((string)(this["DatabasePath"]));
+                return ((string)(this["FoldersCsvPath"]));
             }
             set {
-                this["DatabasePath"] = value;
+                this["FoldersCsvPath"] = value;
             }
         }
     }

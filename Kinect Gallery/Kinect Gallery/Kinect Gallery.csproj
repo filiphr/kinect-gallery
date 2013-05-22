@@ -83,6 +83,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Exceptions\ExistsException.cs" />
     <Compile Include="Helpers\Folder.cs" />
     <Compile Include="Helpers\ImageConverter.cs" />
     <Compile Include="Helpers\ReadWriteCsv.cs" />

@@ -24,7 +24,7 @@ namespace Kinect_Gallery.Helpers
         }
 
         public CsvFileWriter(string filename)
-            : base(filename)
+            : base(filename, true)
         {
         }
 

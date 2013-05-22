@@ -21,6 +21,8 @@ namespace Kinect_Gallery
     using System.Windows.Controls;
     using Kinect_Gallery.Helpers;
     using System.Windows.Forms;
+    using Kinect_Gallery.Properties;
+    using Kinect_Gallery.Exceptions;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -113,15 +115,17 @@ namespace Kinect_Gallery
         /// <summary>
         /// Flag used for selecting a folder
         /// </summary>
-        int flag = 0;
+        private int flag = 0;
 
         /// <summary>
         /// Z coordinate for depth calculation
         /// </summary>
-        float z1;
+        private float z1;
 
-
-
+        /// <summary>
+        /// The previous selected path in the folderpicker
+        /// </summary>
+        private string folderPickerSelectedPath = null;
 
 
         /// <summary>
@@ -835,15 +839,31 @@ namespace Kinect_Gallery
             lstFolders.SelectedIndex = -1;
         }
 
+        /// <summary>
+        /// Handler for the Add Folder button in Folder View
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The event args</param>
         private void btnAddFolder_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new FolderBrowserDialog();
-            dialog.SelectedPath = "C:\\";
+            if (folderPickerSelectedPath != null)
+            {
+                dialog.SelectedPath = folderPickerSelectedPath;
+            }
             DialogResult result = dialog.ShowDialog();
             if (result.ToString() == "OK")
             {
                 string folderPath = System.IO.Path.GetFullPath(dialog.SelectedPath.ToString()).TrimEnd(System.IO.Path.DirectorySeparatorChar);
-                folders.Add(new Folder(folderPath));
+                folderPickerSelectedPath = folderPath;
+                try
+                {
+                    folders.InsertAndAdd(folderPath);
+                }
+                catch (ExistsException ex)
+                {
+                    System.Windows.MessageBox.Show(ex.Message);
+                }
             }
         }
     }
