@@ -29,7 +29,6 @@ namespace Kinect_Gallery.Helpers
         {
             DirectoryInfo di = new DirectoryInfo(folderPath);
             FileInfo imagePath = di.GetFiles("*.jpg", SearchOption.AllDirectories).FirstOrDefault();
-//            FileInfo imagePath = null;
             Uri imageUri = null;
             if (imagePath != null)
             {
@@ -47,7 +46,6 @@ namespace Kinect_Gallery.Helpers
     {
         public Folders()
         {
-            String imagesPath = Settings.Default.ImagesPath;
             String foldersCsvPath = Settings.Default.FoldersCsvPath;
             // Read sample data from CSV file
             using (CsvFileReader reader = new CsvFileReader(foldersCsvPath))
