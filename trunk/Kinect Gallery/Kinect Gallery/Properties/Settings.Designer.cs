@@ -26,10 +26,23 @@ namespace Kinect_Gallery.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\Dopolnitelno\\\\Projects\\\\Visual Studio 2010\\\\Projects\\\\Kinect Gallery\\\\Kinect " +
-            "Gallery\\\\Images\\\\")]
+            "Gallery\\\\Images")]
         public string ImagesPath {
             get {
-                return ((string)(this["imagesPath"]));
+                return ((string)(this["ImagesPath"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\Dopolnitelno\\\\Projects\\\\Visual Studio 2010\\\\Projects\\\\Kinect Gallery\\\\Kinect " +
+            "Gallery\\\\Database")]
+        public string DatabasePath {
+            get {
+                return ((string)(this["DatabasePath"]));
+            }
+            set {
+                this["DatabasePath"] = value;
             }
         }
     }

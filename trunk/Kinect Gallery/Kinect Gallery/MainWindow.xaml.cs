@@ -1,30 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Kinect_Gallery.Helpers;
-using Microsoft.Samples.Kinect.SwipeGestureRecognizer;
-using Microsoft.Kinect;
-using System.ComponentModel;
-using System.IO;
-using System.Diagnostics;
-using System.Windows.Media.Animation;
+﻿
+
+
+
 
 namespace Kinect_Gallery
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Windows;
+    using System.Windows.Media;
+    using System.Windows.Media.Animation;
+    using System.Windows.Media.Imaging;
+    using System.Windows.Shapes;
+    using Microsoft.Kinect;
+    using Microsoft.Samples.Kinect.SwipeGestureRecognizer;
+    using System.Windows.Controls;
+    using Kinect_Gallery.Helpers;
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         /// <summary>
         /// The recognizer being used.
@@ -614,6 +613,11 @@ namespace Kinect_Gallery
                                 }
                                 if ((z1 - ((float)handPosition.Z)) >= 0.3)
                                 {
+                                    BitmapImage logo = new BitmapImage();
+                                    logo.BeginInit();
+                                    logo.UriSource = new Uri(@"Images\right-hand-green.png", UriKind.Relative);
+                                    logo.EndInit();
+                                    handImg.Source = logo;
                                     lstFolders.SelectedIndex = selectItem(left);
                                     flag = 0;
                                 }
@@ -802,6 +806,10 @@ namespace Kinect_Gallery
             FolderView.Visibility = Visibility.Visible;
             Index = 1;
             lstFolders.SelectedIndex = -1;
+            BitmapImage logo = new BitmapImage();
+            logo.BeginInit();
+            logo.UriSource = new Uri(@"Images\right-hand-green.png", UriKind.Relative);
+            logo.EndInit();
         }
     }
 }
