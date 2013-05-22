@@ -629,8 +629,7 @@ namespace Kinect_Gallery
                                 {
                                     z1 = (float)handPosition.Z;
                                     flag = 1;
-                                }
-                                if ((z1 - ((float)handPosition.Z)) >= 0.3)
+                                }else if ((z1 - ((float)handPosition.Z)) >= 0.3)
                                 {//txtHi5.Text = "Hi 5";
                                     BitmapImage logo = new BitmapImage();
                                     logo.BeginInit();
