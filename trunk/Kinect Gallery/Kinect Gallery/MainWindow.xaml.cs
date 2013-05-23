@@ -23,6 +23,9 @@ namespace Kinect_Gallery
     using System.Windows.Forms;
     using Kinect_Gallery.Properties;
     using Kinect_Gallery.Exceptions;
+    using Microsoft.Speech.Recognition;
+    using System.Text;
+    using Microsoft.Speech.AudioFormat;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -127,6 +130,11 @@ namespace Kinect_Gallery
         /// </summary>
         private string folderPickerSelectedPath = null;
 
+        /// <summary>
+        /// Speech recognition engine using audio data from Kinect.
+        /// </summary>
+        private SpeechRecognitionEngine speechEngine;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow" /> class.
@@ -145,6 +153,9 @@ namespace Kinect_Gallery
 
             // Wire-up window loaded event.
             Loaded += this.OnMainWindowLoaded;
+
+            // Wire-up window closing event.
+            Closing += this.WindowClosing;
 
             lstFolders.ItemsSource = folders;
 
@@ -565,6 +576,79 @@ namespace Kinect_Gallery
                         break;
                 }
             };
+
+            RecognizerInfo ri = GetKinectRecognizer();
+
+            if (null != ri)
+            {
+
+                this.speechEngine = new SpeechRecognitionEngine(ri.Id);
+
+                /****************************************************************
+                * 
+                * Use this code to create grammar programmatically rather than from
+                * a grammar file.
+                * 
+                * var directions = new Choices();
+                * directions.Add(new SemanticResultValue("forward", "FORWARD"));
+                * directions.Add(new SemanticResultValue("forwards", "FORWARD"));
+                * directions.Add(new SemanticResultValue("straight", "FORWARD"));
+                * directions.Add(new SemanticResultValue("backward", "BACKWARD"));
+                * directions.Add(new SemanticResultValue("backwards", "BACKWARD"));
+                * directions.Add(new SemanticResultValue("back", "BACKWARD"));
+                * directions.Add(new SemanticResultValue("turn left", "LEFT"));
+                * directions.Add(new SemanticResultValue("turn right", "RIGHT"));
+                *
+                * var gb = new GrammarBuilder { Culture = ri.Culture };
+                * gb.Append(directions);
+                *
+                * var g = new Grammar(gb);
+                * 
+                ****************************************************************/
+
+                // Create a grammar from grammar definition XML file.
+                using (var memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(Properties.Resources.SpeechGrammar)))
+                {
+                    var g = new Grammar(memoryStream);
+                    speechEngine.LoadGrammar(g);
+                }
+
+                speechEngine.SpeechRecognized += SpeechRecognized;
+
+                // For long recognition sessions (a few hours or more), it may be beneficial to turn off adaptation of the acoustic model. 
+                // This will prevent recognition accuracy from degrading over time.
+                speechEngine.UpdateRecognizerSetting("AdaptationOn", 0);
+
+                speechEngine.SetInputToAudioStream(
+                    nui.AudioSource.Start(), new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
+                speechEngine.RecognizeAsync(RecognizeMode.Multiple);
+            }
+            else
+            {
+                this.statusBarText.Text = Properties.Resources.NoSpeechRecognizer;
+            }
+        }
+
+        /// <summary>
+        /// Execute uninitialization tasks.
+        /// </summary>
+        /// <param name="sender">object sending the event.</param>
+        /// <param name="e">event arguments.</param>
+        private void WindowClosing(object sender, CancelEventArgs e)
+        {
+            if (null != this.nui)
+            {
+                this.nui.AudioSource.Stop();
+
+                this.nui.Stop();
+                this.nui = null;
+            }
+
+            if (null != this.speechEngine)
+            {
+                this.speechEngine.SpeechRecognized -= SpeechRecognized;
+                this.speechEngine.RecognizeAsyncStop();
+            }
         }
 
         /// <summary>
@@ -792,6 +876,28 @@ namespace Kinect_Gallery
         }
 
         /// <summary>
+        /// Gets the metadata for the speech recognizer (acoustic model) most suitable to
+        /// process audio from Kinect device.
+        /// </summary>
+        /// <returns>
+        /// RecognizerInfo if found, <code>null</code> otherwise.
+        /// </returns>
+        private static RecognizerInfo GetKinectRecognizer()
+        {
+            foreach (RecognizerInfo recognizer in SpeechRecognitionEngine.InstalledRecognizers())
+            {
+                string value;
+                recognizer.AdditionalInfo.TryGetValue("Kinect", out value);
+                if ("True".Equals(value, StringComparison.OrdinalIgnoreCase) && "en-US".Equals(recognizer.Culture.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return recognizer;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Handler for the SelecctionChanged of the ListBox
         /// </summary>
         /// <param name="sender">The sender</param>
@@ -816,6 +922,7 @@ namespace Kinect_Gallery
                     this.PropertyChanged(this, new PropertyChangedEventArgs("Picture"));
                     this.PropertyChanged(this, new PropertyChangedEventArgs("NextPicture"));
                 }
+                //this.nui.AudioSource.Start();
             }
         }
 
@@ -836,6 +943,7 @@ namespace Kinect_Gallery
             handImg.Source = logo;
             Index = 1;
             lstFolders.SelectedIndex = -1;
+            //this.nui.AudioSource.Stop();
         }
 
         /// <summary>
@@ -862,6 +970,29 @@ namespace Kinect_Gallery
                 catch (ExistsException ex)
                 {
                     System.Windows.MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handler for recognized speech events.
+        /// </summary>
+        /// <param name="sender">object sending the event.</param>
+        /// <param name="e">event arguments.</param>
+        private void SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        {
+            // Speech utterance confidence below which we treat speech as if it hadn't been heard
+            const double ConfidenceThreshold = 0.3;
+            if (GalleryView.Visibility == Visibility.Visible)
+            {
+                if (e.Result.Confidence >= ConfidenceThreshold)
+                {
+                    switch (e.Result.Semantics.Value.ToString())
+                    {
+                        case "BACKWARD":
+                            this.btnBack.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
+                            break;
+                    }
                 }
             }
         }
